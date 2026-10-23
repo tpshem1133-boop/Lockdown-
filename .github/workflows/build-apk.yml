@@ -1,0 +1,75 @@
+# Build a debug APK and debug AAB in the cloud and attach them to each run.
+#
+# Why this exists: LOCKDOWN is delivered as Android Studio source. This
+# workflow compiles it on GitHub's runners (which have the Android SDK) so
+# you get installable APK + AAB files without needing Android Studio or a
+# local SDK.
+#
+# How to use:
+#   1. Push this project to a GitHub repo (git init, commit, push).
+#   2. Open the repo's "Actions" tab -> "Build debug APK + AAB" -> "Run
+#      workflow" (it also runs automatically on every push to main/master).
+#   3. Download the "Lockdown-debug-apk" artifact, copy it to your phone,
+#      and tap it to install (allow "install unknown apps" for your browser
+#      or file manager when prompted).
+#
+# The debug APK/AAB are signed with a debug key, so the APK installs fine
+# for personal use. For a Play Store release you'd need a real signing key
+# and a release build instead.
+
+name: Build debug APK + AAB
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # v4 + explicit packages: v3's default package list ("tools
+      # platform-tools") now fails because Google removed the obsolete
+      # `tools` package from the SDK repository. Missing platforms and
+      # build-tools are auto-installed by AGP at build time.
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+        with:
+          packages: "platform-tools"
+
+      # No Gradle wrapper is checked in, so download Gradle directly.
+      # AGP 8.5.x requires Gradle 8.7+.
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.7"
+
+      - name: Build debug APK
+        run: gradle :app:assembleDebug --stacktrace
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lockdown-debug-apk
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      - name: Build debug AAB
+        run: gradle :app:bundleDebug --stacktrace
+
+      - name: Upload AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: Lockdown-debug-aab
+          path: app/build/outputs/bundle/debug/app-debug.aab
+          if-no-files-found: error
