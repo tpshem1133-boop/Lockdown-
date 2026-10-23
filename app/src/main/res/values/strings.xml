@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">LOCKDOWN</string>
+    <string name="accessibility_label">LOCKDOWN Blocking Engine</string>
+    <string name="accessibility_desc">LOCKDOWN uses this service to detect when a blocked app or website is opened and to show the blocking screen. It reads browser address bars only to check them against your own block list. Everything stays on your device.</string>
+    <string name="admin_description">Prevents LOCKDOWN from being uninstalled or disabled while Strict Mode is active, and lets it lock the device.</string>
+    <string name="notification_channel_name">Strict Mode</string>
+    <string name="notification_channel_desc">Persistent status while LOCKDOWN Strict Mode is active</string>
+</resources>

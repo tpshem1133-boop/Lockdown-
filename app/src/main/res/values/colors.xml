@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Obsidian Vault palette: black, charcoal, white, one lime accent -->
+    <color name="vault_black">#0A0A0A</color>
+    <color name="charcoal">#1C1C1E</color>
+    <color name="electric_lime">#CCFF00</color>
+    <color name="pure_white">#FFFFFF</color>
+    <color name="ic_launcher_background">#0A0A0A</color>
+</resources>

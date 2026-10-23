@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Notification small icon: white padlock silhouette -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:pathData="M45,57 V47 a9,9 0 0 1 18,0 V57"
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="7"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M42,55 h24 a5,5 0 0 1 5,5 v19 a5,5 0 0 1 -5,5 h-24 a5,5 0 0 1 -5,-5 v-19 a5,5 0 0 1 5,-5 z"
+        android:fillColor="#FFFFFF" />
+</vector>

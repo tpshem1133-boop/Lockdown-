@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- LOCKDOWN icon: minimalist lime padlock on black.
+     The shackle + body form a bold geometric lock (safe zone centered). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- shackle -->
+    <path
+        android:pathData="M45,57 V47 a9,9 0 0 1 18,0 V57"
+        android:strokeColor="#CCFF00"
+        android:strokeWidth="6.5"
+        android:strokeLineCap="round" />
+    <!-- body -->
+    <path
+        android:pathData="M42,55 h24 a5,5 0 0 1 5,5 v19 a5,5 0 0 1 -5,5 h-24 a5,5 0 0 1 -5,-5 v-19 a5,5 0 0 1 5,-5 z"
+        android:fillColor="#CCFF00" />
+    <!-- keyhole (cut out in background black) -->
+    <path
+        android:pathData="M54,63.5 a4.2,4.2 0 1 0 0.01,0 z M52.1,66.5 h3.8 l1.1,7.5 h-6 z"
+        android:fillColor="#0A0A0A" />
+</vector>
