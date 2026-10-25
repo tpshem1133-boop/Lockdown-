@@ -6,42 +6,31 @@ import com.lockdown.strictblocker.core.Prefs
 /**
  * Strict Mode state transitions.
  *
- * The deadline is stored as an absolute epoch timestamp, so reboots, process
- * death and clock-consistent countdowns all behave: nothing but the passage
- * of time can end a Strict Mode session. There is intentionally no
- * "deactivate" API — activation is one-way until the timer expires.
+ * PIN-only lock: once activated, Strict Mode stays on indefinitely — there
+ * is no timer and no expiry. The ONLY way to change anything (lists,
+ * settings, deactivation) is to enter the vault PIN on the Strict Mode tab,
+ * which lifts the lock. The lock flag survives reboots and process death; a
+ * BOOT_COMPLETED receiver re-arms protection.
  */
 object StrictMode {
 
-    /** Preset durations offered on the Strict Mode tab. */
-    val PRESETS: List<Pair<String, Long>> = listOf(
-        "15 min" to 15 * 60_000L,
-        "30 min" to 30 * 60_000L,
-        "1 hour" to 60 * 60_000L,
-        "6 hours" to 6 * 60 * 60_000L,
-        "24 hours" to 24 * 60 * 60_000L
-    )
-
-    const val MAX_CUSTOM_HOURS = 99
-
     fun isActive(context: Context): Boolean = Prefs.get(context).isStrictActive()
 
-    fun remainingMillis(context: Context): Long = Prefs.get(context).strictRemainingMillis()
-
-    fun endMillis(context: Context): Long = Prefs.get(context).strictEndMillis
-
-    /**
-     * Start Strict Mode for [durationMillis]. Refuses to shorten an already
-     * running session — extending is allowed, weakening is not.
-     */
-    fun activate(context: Context, durationMillis: Long): Boolean {
-        require(durationMillis > 0) { "duration must be positive" }
+    /** Lock Strict Mode. Returns false if it is already locked. */
+    fun activate(context: Context): Boolean {
         val prefs = Prefs.get(context)
-        val newEnd = System.currentTimeMillis() + durationMillis
-        if (prefs.isStrictActive() && newEnd <= prefs.strictEndMillis) return false
-        prefs.strictEndMillis = newEnd
-        prefs.strictTotalMillis = newEnd - System.currentTimeMillis()
+        if (prefs.isStrictActive()) return false
+        prefs.strictLocked = true
         MonitorService.start(context)
         return true
+    }
+
+    /**
+     * Lift the lock. Call only after the vault PIN has been verified — this
+     * is the single sanctioned way out of Strict Mode.
+     */
+    fun deactivate(context: Context) {
+        Prefs.get(context).strictLocked = false
+        MonitorService.start(context) // refresh the persistent notification text
     }
 }

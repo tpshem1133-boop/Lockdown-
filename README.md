@@ -2,8 +2,9 @@
 
 A standalone, offline-first Android app whose only job is to make app & website
 blocking **unbreakable** while Strict Mode is running. You pick what to block,
-activate Strict Mode for a set duration, and until the timer ends you cannot
-edit the lists, open Settings, remove the app, or stop it early.
+activate Strict Mode, and until you unlock it with your vault code you cannot
+edit the lists, open Settings, remove the app, or stop it early. There is no
+timer and no expiry.
 
 - Package: `com.lockdown.strictblocker`
 - Kotlin 100%, Jetpack Compose UI, Room database
@@ -34,19 +35,20 @@ edit the lists, open Settings, remove the app, or stop it early.
   if a URL contains one of your keywords (`news` blocks `cnn.com/news`), the
   page is covered by the blocking screen.
 - **Full-screen blocking screen** — black vault door, breathing lime padlock,
-  the reason, and the live Strict Mode countdown. No close button.
+  and the reason. No close button.
 
 ### Strict Mode
-- Durations: 15 min, 30 min, 1 h, 6 h, 24 h, or custom up to 99 hours.
-- The deadline is stored as an absolute timestamp: reboots and process death
-  don't shorten it. A `BOOT_COMPLETED` receiver re-arms protection.
-- While active:
+- PIN-only lock: once activated, Strict Mode stays on indefinitely — no
+  timer, no expiry, not even across reboots.
+- The lock is a persistent flag: reboots and process death don't lift it.
+  A `BOOT_COMPLETED` receiver re-arms protection.
+- While locked:
   - Block lists are frozen (the UI refuses edits).
   - The system Settings app is guarded by the overlay, so LOCKDOWN's App
     info, Accessibility and Device Admin screens can't be reached.
-  - A persistent, non-dismissible notification shows the time remaining.
-  - A running session can be *extended* but never shortened.
-- Strict Mode ends only when the timer expires.
+  - A persistent, non-dismissible notification shows the lock is on.
+- The ONLY way to change anything is to enter the vault code on the
+  Strict Mode tab, which lifts the lock.
 
 ### Vault PIN
 - Forced 4-digit PIN creation on first launch.
@@ -54,8 +56,11 @@ edit the lists, open Settings, remove the app, or stop it early.
 - Stored as a salted SHA-256 hash in `EncryptedSharedPreferences`
   (AES-256) — never in plain text. No biometric bypass.
 - 5 wrong attempts → 1-minute lockout.
-- **Forgot PIN** works only when Strict Mode is *not* active: answer your
-  recovery question, or request a reset and wait 24 hours.
+- **Forgot PIN**: answer your recovery question — this works even while
+  Strict Mode is locked, and sets a new code (the lock stays on until the
+  new code unlocks it). The 24-hour reset request is available only when
+  Strict Mode is *not* active. Without a code or a recovery question, a
+  lock cannot be lifted from inside the app.
 
 ### Protection levels (honest version)
 Android decides how deep an app's protection can go:
@@ -139,7 +144,7 @@ adb shell dpm remove-active-admin com.lockdown.strictblocker/.engine.AdminReceiv
 
 ## How to uninstall
 
-1. Wait for Strict Mode to end (nothing can remove LOCKDOWN mid-session).
+1. Unlock Strict Mode with your vault code (nothing can remove LOCKDOWN while locked).
 2. Open **Settings tab → enter PIN → Deactivate Device Admin**.
 3. Uninstall normally. (Device Owner: run the `remove-active-admin` ADB
    command above first.)

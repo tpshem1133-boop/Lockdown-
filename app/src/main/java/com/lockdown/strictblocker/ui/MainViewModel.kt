@@ -41,14 +41,12 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
 
     val installedApps = MutableStateFlow<List<AppEntry>>(emptyList())
 
-    /** Live Strict Mode countdown for the UI (services enforce it in the background). */
-    val strictRemaining = MutableStateFlow(0L)
+    /** Live Strict Mode lock state for the UI (services enforce it in the background). */
     val strictActive = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
             while (true) {
-                strictRemaining.value = prefs.strictRemainingMillis()
                 strictActive.value = prefs.isStrictActive()
                 delay(500)
             }
@@ -98,8 +96,14 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch { repo.remove(item) }
     }
 
-    fun activateStrict(durationMillis: Long): Boolean =
-        StrictMode.activate(getApplication(), durationMillis)
+    fun activateStrict(): Boolean =
+        StrictMode.activate(getApplication()).also { strictActive.value = prefs.isStrictActive() }
+
+    /** Lift the Strict Mode lock. Call only after the vault PIN was verified. */
+    fun deactivateStrict() {
+        StrictMode.deactivate(getApplication())
+        strictActive.value = false
+    }
 
     private fun loadInstalledApps() {
         viewModelScope.launch(Dispatchers.IO) {

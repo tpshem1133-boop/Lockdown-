@@ -7,8 +7,8 @@ import com.lockdown.strictblocker.core.Prefs
 
 /**
  * After a reboot: if setup was completed, restart the monitor (and the VPN
- * if the user had website blocking on) so an active Strict Mode — whose
- * deadline is stored as an absolute timestamp — simply keeps counting.
+ * if the user had website blocking on) so a locked Strict Mode — stored as
+ * a persistent flag, with no timer — simply stays locked.
  */
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {

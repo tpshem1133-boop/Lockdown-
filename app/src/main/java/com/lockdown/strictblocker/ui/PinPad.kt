@@ -199,8 +199,9 @@ private fun SecurityQuestionSetup(pinManager: PinManager, onDone: () -> Unit) {
         Text("Recovery question", style = MaterialTheme.typography.headlineMedium)
         Spacer(Modifier.height(8.dp))
         Text(
-            "If you ever forget the code, this question is one way back in. " +
-                "Recovery only works when Strict Mode is not running.",
+            "If you ever forget the code, this question lets you set a new " +
+                "one — even while Strict Mode is locked. Without it, a " +
+                "forgotten code while locked has no way back in.",
             color = MutedWhite,
             style = MaterialTheme.typography.bodyMedium
         )
@@ -311,10 +312,10 @@ private fun ForgotPinDialog(
         text = {
             Column {
                 when {
-                    strictActive -> Text(
-                        "PIN recovery is disabled while Strict Mode is active. " +
-                            "It unlocks when the timer ends."
-                    )
+                    // The recovery question works even while locked: a
+                    // correct answer lets you pick a new code, but the lock
+                    // stays on until the new code unlocks it. The 24-hour
+                    // wait path below is only offered when not locked.
                     question != null -> {
                         Text(question)
                         Spacer(Modifier.height(12.dp))
@@ -326,6 +327,12 @@ private fun ForgotPinDialog(
                             modifier = Modifier.fillMaxWidth()
                         )
                     }
+                    strictActive -> Text(
+                        "No recovery question is set, and while Strict Mode " +
+                            "is locked there is no timer to wait out. The " +
+                            "lock cannot be lifted from inside the app " +
+                            "without your code."
+                    )
                     waitDone -> Text("Your 24-hour wait is over. You can reset the PIN now.")
                     requestedAt > 0 -> Text(
                         "Reset requested. It unlocks in about ${"%.1f".format(hoursLeft)} hours."
@@ -342,7 +349,6 @@ private fun ForgotPinDialog(
         },
         confirmButton = {
             when {
-                strictActive -> TextButton(onClick = onClose) { Text("OK") }
                 question != null -> Button(
                     onClick = {
                         if (pinManager.verifySecurityAnswer(answer)) {
@@ -367,6 +373,9 @@ private fun ForgotPinDialog(
                         contentColor = VaultBlack
                     )
                 ) { Text("Reset PIN") }
+                // While locked, no time-based reset: the code (or the
+                // recovery question above) is the only way back in.
+                strictActive -> TextButton(onClick = onClose) { Text("OK") }
                 requestedAt == 0L -> Button(
                     onClick = {
                         pinManager.recoveryRequestedAt = System.currentTimeMillis()

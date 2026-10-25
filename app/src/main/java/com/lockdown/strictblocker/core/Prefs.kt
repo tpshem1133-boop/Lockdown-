@@ -7,7 +7,7 @@ enum class ListMode { BLACKLIST, WHITELIST }
 
 /**
  * Plain (non-sensitive) app state: list modes, onboarding progress and the
- * Strict Mode deadline. Read synchronously by the blocking services, so this
+ * Strict Mode lock flag. Read synchronously by the blocking services, so this
  * deliberately uses commit-free apply() writes and cached reads.
  *
  * The PIN itself never lives here — see PinManager (encrypted storage).
@@ -41,32 +41,25 @@ class Prefs private constructor(context: Context) {
         get() = prefs.getBoolean(KEY_VPN_RUNNING, false)
         set(v) = prefs.edit().putBoolean(KEY_VPN_RUNNING, v).apply()
 
-    /** Epoch millis when Strict Mode ends. 0 = Strict Mode not scheduled. */
-    var strictEndMillis: Long
-        get() = prefs.getLong(KEY_STRICT_END, 0L)
-        set(v) = prefs.edit().putLong(KEY_STRICT_END, v).apply()
+    /**
+     * PIN-only Strict Mode lock. True from activation until the vault PIN
+     * unlocks it — there is no timer and no expiry.
+     */
+    var strictLocked: Boolean
+        get() = prefs.getBoolean(KEY_STRICT_LOCKED, false)
+        set(v) = prefs.edit().putBoolean(KEY_STRICT_LOCKED, v).apply()
 
-    /** Total length of the current Strict Mode session (for the progress ring). */
-    var strictTotalMillis: Long
-        get() = prefs.getLong(KEY_STRICT_TOTAL, 0L)
-        set(v) = prefs.edit().putLong(KEY_STRICT_TOTAL, v).apply()
-
-    /** True while the Strict Mode countdown is still running. */
-    fun isStrictActive(now: Long = System.currentTimeMillis()): Boolean =
-        strictEndMillis > now
-
-    fun strictRemainingMillis(now: Long = System.currentTimeMillis()): Long =
-        (strictEndMillis - now).coerceAtLeast(0L)
+    /** True while Strict Mode is locked. */
+    fun isStrictActive(): Boolean = strictLocked
 
     companion object {
         private const val FILE = "lockdown_prefs"
         private const val KEY_ONBOARDING = "onboarding_complete"
         private const val KEY_APP_MODE = "app_mode"
         private const val KEY_WEB_MODE = "web_mode"
-        private const val KEY_STRICT_END = "strict_end_millis"
+        private const val KEY_STRICT_LOCKED = "strict_locked"
         private const val KEY_VPN = "vpn_enabled"
         private const val KEY_VPN_RUNNING = "vpn_running"
-        private const val KEY_STRICT_TOTAL = "strict_total_millis"
 
         @Volatile
         private var instance: Prefs? = null

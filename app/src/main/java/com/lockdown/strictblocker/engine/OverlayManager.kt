@@ -17,7 +17,6 @@ import android.widget.LinearLayout
 import android.widget.TextView
 import com.lockdown.strictblocker.R
 import com.lockdown.strictblocker.core.Prefs
-import com.lockdown.strictblocker.core.formatRemaining
 
 /**
  * The full-screen blocking screen, drawn as a system overlay so it can sit
@@ -91,7 +90,7 @@ object OverlayManager {
         val ctx = tv.context
         val prefs = Prefs.get(ctx)
         tv.text = if (prefs.isStrictActive()) {
-            "Available in ${formatRemaining(prefs.strictRemainingMillis())}"
+            "LOCKDOWN is locked — enter your vault code in the app to change anything"
         } else {
             "Strict Mode is off — edit your list in LOCKDOWN"
         }

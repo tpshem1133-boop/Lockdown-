@@ -17,16 +17,15 @@ import android.os.Looper
 import com.lockdown.strictblocker.MainActivity
 import com.lockdown.strictblocker.R
 import com.lockdown.strictblocker.core.Prefs
-import com.lockdown.strictblocker.core.formatRemaining
 
 /**
  * Always-on enforcement service (once setup is complete):
  *
  *  - Backup foreground-app detection via UsageStats, in case the
  *    Accessibility Service is off or delayed.
- *  - Posts the persistent, non-dismissible notification:
- *    "LOCKDOWN is Active — Xh Ym remaining" while Strict Mode runs.
- *  - Watches the Strict Mode deadline and refreshes state when it expires.
+ *  - Posts the persistent, non-dismissible notification while Strict Mode
+ *    is locked ("LOCKDOWN is Locked").
+ *  - Refreshes state when the Strict Mode lock is lifted.
  */
 class MonitorService : Service() {
 
@@ -106,7 +105,7 @@ class MonitorService : Service() {
     private fun checkStrictTransition() {
         val active = Prefs.get(this).isStrictActive()
         if (wasStrictActive && !active) {
-            // Timer just expired: re-evaluate whatever is in front of the
+            // Lock just lifted: re-evaluate whatever is in front of the
             // user (e.g. Settings behind the guard overlay is free again).
             lastPackage?.let { evaluate(it) }
         }
@@ -126,7 +125,7 @@ class MonitorService : Service() {
     private fun notificationText(): String {
         val prefs = Prefs.get(this)
         return if (prefs.isStrictActive()) {
-            "LOCKDOWN is Active — ${formatRemaining(prefs.strictRemainingMillis())} remaining"
+            "LOCKDOWN is Locked — your vault code is the only way back in"
         } else {
             "LOCKDOWN protection is on"
         }
@@ -142,10 +141,10 @@ class MonitorService : Service() {
         )
         return Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_stat_lock)
-            .setContentTitle(if (strict) "LOCKDOWN is Active" else "LOCKDOWN")
+            .setContentTitle(if (strict) "LOCKDOWN is Locked" else "LOCKDOWN")
             .setContentText(
                 if (strict) {
-                    "${formatRemaining(prefs.strictRemainingMillis())} remaining — no way out"
+                    "Locked — your vault code is the only way back in"
                 } else {
                     "Blocking engine is running"
                 }
