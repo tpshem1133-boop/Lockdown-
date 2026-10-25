@@ -22,10 +22,11 @@ class PinManager private constructor(context: Context) {
         // security-crypto 1.0.0 has no MasterKey builder (that API arrived in
         // 1.1.0-alpha); the 1.0.0 key-alias API is MasterKeys.
         val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
+        // 1.0.0 overload order: fileName, masterKeyAlias, context, ...
         EncryptedSharedPreferences.create(
-            context.applicationContext,
             FILE,
             masterKeyAlias,
+            context.applicationContext,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
