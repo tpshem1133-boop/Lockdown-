@@ -4,7 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
 import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import androidx.security.crypto.MasterKeys
 import java.security.MessageDigest
 import java.security.SecureRandom
 
@@ -19,13 +19,13 @@ import java.security.SecureRandom
 class PinManager private constructor(context: Context) {
 
     private val prefs: SharedPreferences = run {
-        val masterKey = MasterKey.Builder(context.applicationContext)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
+        // security-crypto 1.0.0 has no MasterKey builder (that API arrived in
+        // 1.1.0-alpha); the 1.0.0 key-alias API is MasterKeys.
+        val masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC)
         EncryptedSharedPreferences.create(
             context.applicationContext,
             FILE,
-            masterKey,
+            masterKeyAlias,
             EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
             EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
         )
