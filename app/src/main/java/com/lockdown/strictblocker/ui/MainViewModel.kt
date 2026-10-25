@@ -56,13 +56,15 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
         loadInstalledApps()
     }
 
-    fun setAppMode(mode: ListMode) {
+    // Named update* (not set*) because the appMode/webMode properties already
+    // generate JVM setters with those signatures.
+    fun updateAppMode(mode: ListMode) {
         if (strictActive.value) return // lists are frozen during Strict Mode
         prefs.appMode = mode
         appMode = mode
     }
 
-    fun setWebMode(mode: ListMode) {
+    fun updateWebMode(mode: ListMode) {
         if (strictActive.value) return
         prefs.webMode = mode
         webMode = mode

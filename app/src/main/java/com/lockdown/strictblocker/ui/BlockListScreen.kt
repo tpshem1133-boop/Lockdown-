@@ -135,7 +135,7 @@ fun BlockListScreen(vm: MainViewModel, refreshKey: Int) {
             ModeSwitch(
                 mode = vm.appMode,
                 enabled = !strictActive,
-                onChange = { vm.setAppMode(it) }
+                onChange = { vm.updateAppMode(it) }
             )
             Text(
                 when (vm.appMode) {
@@ -176,7 +176,7 @@ fun BlockListScreen(vm: MainViewModel, refreshKey: Int) {
             ModeSwitch(
                 mode = vm.webMode,
                 enabled = !strictActive,
-                onChange = { vm.setWebMode(it) }
+                onChange = { vm.updateWebMode(it) }
             )
             Text(
                 when (vm.webMode) {
